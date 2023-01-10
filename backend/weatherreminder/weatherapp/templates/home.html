@@ -1,0 +1,24 @@
+{% include 'main.html' %}
+
+{% block content %}
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" name="city" label="Enter your city">
+    <button type="submit">Search</button>
+
+</form>
+
+{% if city %}
+<p>{{date}}</p>
+<p>City: {{city}}</p>
+<p>Weather: {{weather}}</p>
+<p>Description: {{description}}</p>
+<p>Temp: {{temp}}</p>
+<img src=" http://openweathermap.org/img/wn/{{icon}}@2x.png">
+
+{% else %}
+<h1>Please enter valid city name</h1>
+{% endif %}
+
+{% endblock %}
