@@ -16,8 +16,6 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,7 +25,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'weatherapp',
     'rest_framework',
+    # 'rest_framework.authtoken',
 ]
+
+
+AUTH_USER_MODEL = 'weatherapp.MyUser'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -111,11 +114,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
-REST_FRAMEWORK = {
+'''REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
-}
+}'''
