@@ -27,3 +27,12 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+
+class City(models.Model):
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
+    city = models.CharField(max_length=150, unique=True)
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return "User {} subscribed to {}".format(self.user, self.city)
