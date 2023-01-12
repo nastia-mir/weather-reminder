@@ -5,7 +5,6 @@ from .views import MyTokenObtainPairView
 
 urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
-    path('users/', views.UsersView.as_view(), name='users'),
     path('user/subscriptions/', views.SubscriptionsView.as_view(), name='subscriptions'),
 
 

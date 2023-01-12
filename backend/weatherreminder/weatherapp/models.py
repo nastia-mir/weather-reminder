@@ -29,10 +29,10 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
 
 
 class City(models.Model):
-    user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='cities')
     city = models.CharField(max_length=150, unique=True)
 
     objects = models.Manager()
 
     def __str__(self):
-        return "User {} subscribed to {}".format(self.user, self.city)
+        return self.city

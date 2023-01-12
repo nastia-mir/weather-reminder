@@ -70,29 +70,20 @@ class HomeView(APIView):
         return Response(context)
 
 
-class UsersView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request):
-        users = MyUser.objects.all()
-        serialized = UserSerializer(users, many=True)
-        return Response(serialized.data)
-
-
 class SubscriptionsView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        subsctiptions = get_object_or_404(City, user=request.user)
-        serialized = CitySerializer(subsctiptions, many=True)
+        users = MyUser.objects.get(id=request.user.id)
+        serialized = UserSerializer(users)
         return Response(serialized.data)
 
     def post(self, request):
         city = request.data['city']
         subsctiption = City(user=request.user, city=city)
         subsctiption.save()
-        subsctiptions = get_object_or_404(City, user=request.user)
-        serialized = CitySerializer(subsctiptions, many=True)
+        users = MyUser.objects.get(id=request.user.id)
+        serialized = UserSerializer(users)
         return Response(serialized.data)
 
 
