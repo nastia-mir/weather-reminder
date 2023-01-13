@@ -8,8 +8,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 import requests
 from datetime import date
 
-from .models import MyUser, City
-from .serializers import UserSerializer
+from .models import MyUser, City, MyUserManager
+from .serializers import UserSerializer, RegisterSerializer
 API_KEY = '31ee71338fd9a262442351ab26c5707e'
 
 
@@ -94,3 +94,17 @@ class SubscriptionsView(APIView):
 
         else:
             return Response({"message": "subscription not found"})
+
+
+class RegisterView(APIView):
+    def post(self, request):
+        try:
+            existing_user = MyUser.objects.get(email=request.data["email"])
+        except:
+            serializer = RegisterSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user = serializer.save()
+            serialized = UserSerializer(user)
+            return Response(serialized.data)
+
+        return Response({"message": "user with given email already exists"})
