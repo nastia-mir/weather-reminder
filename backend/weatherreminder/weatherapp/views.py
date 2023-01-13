@@ -84,11 +84,28 @@ class SubscriptionsView(APIView):
             serialized = UserSerializer(user)
             return Response(serialized.data)
 
+    def put(self, request):
+        city = request.data['city']
+        notification = int(request.data['notification'])
+        user = MyUser.objects.get(id=request.user.id)
+        cities = [city['city'] for city in UserSerializer(user).data['cities']]
+
+        if city in cities:
+            if notification not in [1, 3, 6, 12]:
+                return Response({"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"})
+
+            subscription = City.objects.get(user=request.user, city=city)
+            subscription.notification = time(notification, 0, 0)
+            subscription.save()
+            serialized = UserSerializer(user)
+            return Response(serialized.data)
+        else:
+            return Response({"message": "you need to subscribe to {} first".format(city)})
+
     def delete(self, request):
         city = request.data['city']
         user = MyUser.objects.get(id=request.user.id)
         if city in UserSerializer(user).data['cities']:
-
             subscription = City.objects.get(user=request.user, city=city)
             subscription.delete()
             user = MyUser.objects.get(id=request.user.id)

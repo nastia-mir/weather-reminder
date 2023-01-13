@@ -1,9 +1,15 @@
 from rest_framework import serializers
-from .models import MyUser
+from .models import MyUser, City
+
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ['city', 'notification']
 
 
 class UserSerializer(serializers.ModelSerializer):
-    cities = serializers.StringRelatedField(many=True)
+    cities = CitySerializer(many=True)
 
     class Meta:
         model = MyUser
