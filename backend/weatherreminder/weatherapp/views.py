@@ -1,13 +1,12 @@
 from django.shortcuts import render, get_object_or_404
+from django.db import IntegrityError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-
 import requests
 from datetime import date, time
-
 from .models import MyUser, City
 from .serializers import UserSerializer, RegisterSerializer
 API_KEY = '31ee71338fd9a262442351ab26c5707e'
@@ -18,7 +17,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token['email'] = user.email
-        token['first_name'] = user.first_name
         return token
 
 
@@ -32,7 +30,7 @@ class HomeView(APIView):
     def get(self, request):
         url = 'http://api.openweathermap.org/data/2.5/weather'
         user = MyUser.objects.get(id=request.user.id)
-        cities = UserSerializer(user).data['cities']
+        cities = [city['city'] for city in UserSerializer(user).data['cities']]
         context = {}
 
         for city in cities:
@@ -78,11 +76,14 @@ class SubscriptionsView(APIView):
         if result['cod'] == '404':
             return Response({"message": "enter valid city name"})
         else:
-            subscription = City(user=request.user, city=city, notification=time(notification, 0, 0))
-            subscription.save()
-            user = MyUser.objects.get(id=request.user.id)
-            serialized = UserSerializer(user)
-            return Response(serialized.data)
+            try:
+                subscription = City(user=request.user, city=city, notification=time(notification, 0, 0))
+                subscription.save()
+                user = MyUser.objects.get(id=request.user.id)
+                serialized = UserSerializer(user)
+                return Response(serialized.data)
+            except IntegrityError:
+                return Response({"message": "you have already subscribed to {}".format(city)})
 
     def put(self, request):
         city = request.data['city']
