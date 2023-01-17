@@ -1,4 +1,3 @@
-from django.shortcuts import render, get_object_or_404
 from django.db import IntegrityError
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,8 +12,7 @@ API_KEY = '31ee71338fd9a262442351ab26c5707e'
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
+    def get_token(self, user):
         token = super().get_token(user)
         token['email'] = user.email
         return token
