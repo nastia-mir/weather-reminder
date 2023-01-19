@@ -8,7 +8,7 @@ import requests
 from datetime import date, time
 from .models import MyUser, City
 from .serializers import UserSerializer, RegisterSerializer
-API_KEY = '31ee71338fd9a262442351ab26c5707e'
+from weatherreminder.settings import API_KEY
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
