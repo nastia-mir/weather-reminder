@@ -28,7 +28,7 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-class City(models.Model):
+class Subscription(models.Model):
     user = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='cities')
     city = models.CharField(max_length=150, unique=True)
     notification = models.TimeField(auto_now=False, auto_now_add=False, default=datetime.time(12, 0, 0))

@@ -6,7 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 import requests
 from datetime import date, time
-from .models import MyUser, City
+from .models import MyUser, Subscription
 from .serializers import UserSerializer, RegisterSerializer
 from weatherreminder.settings import API_KEY
 
@@ -27,12 +27,11 @@ class HomeView(APIView):
 
     def get(self, request):
         url = 'http://api.openweathermap.org/data/2.5/weather'
-        user = MyUser.objects.get(id=request.user.id)
-        cities = [city['city'] for city in UserSerializer(user).data['cities']]
+        cities = list(Subscription.objects.filter(user=request.user).all())
         context = {}
 
         for city in cities:
-            params = {'q': city, 'appid': API_KEY, 'units': 'metric'}
+            params = {'q': city.city, 'appid': API_KEY, 'units': 'metric'}
             r = requests.get(url=url, params=params)
             result = r.json()
             city_context = {}
@@ -46,7 +45,7 @@ class HomeView(APIView):
             elif result['cod'] == '404':
                 city_context['city'] = None
 
-            context[city] = city_context
+            context[city.city] = city_context
 
         return Response(context)
 
@@ -93,7 +92,7 @@ class SubscriptionsView(APIView):
             if notification not in [1, 3, 6, 12]:
                 return Response({"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"})
 
-            subscription = City.objects.get(user=request.user, city=city)
+            subscription = Subscription.objects.get(user=request.user, city=city)
             subscription.notification = time(notification, 0, 0)
             subscription.save()
             serialized = UserSerializer(user)
@@ -103,15 +102,11 @@ class SubscriptionsView(APIView):
 
     def delete(self, request):
         city = request.data['city']
-        user = MyUser.objects.get(id=request.user.id)
-        if city in UserSerializer(user).data['cities']:
-            subscription = City.objects.get(user=request.user, city=city)
+        try:
+            subscription = Subscription.objects.get(user=request.user, city=city)
             subscription.delete()
-            user = MyUser.objects.get(id=request.user.id)
-            serialized = UserSerializer(user)
-            return Response(serialized.data)
-
-        else:
+            return Response({city: "deleted"})
+        except:
             return Response({"message": "subscription not found"})
 
 
