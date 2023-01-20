@@ -66,7 +66,7 @@ class SubscriptionsView(APIView):
                             data={"message": "enter valid city name"})
         else:
             try:
-                subscription = Subscription(user=request.user, city=city, notification=time(notification, 0, 0))
+                subscription = Subscription(user=request.user, city=city, notification=datetime.time(notification, 0, 0))
                 subscription.save()
                 user = MyUser.objects.get(id=request.user.id)
                 serialized = UserSerializer(user)
