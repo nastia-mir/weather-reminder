@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from . import views
+from weatherapp import views
 
 urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),

@@ -13,7 +13,7 @@ import requests
 from .models import MyUser, Subscription
 from .serializers import UserSerializer, RegisterSerializer
 from .services import get_weather
-from weatherreminder.settings import API_KEY
+from weatherreminderproject.settings import API_KEY
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
