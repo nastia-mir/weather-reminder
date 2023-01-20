@@ -4,11 +4,13 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-import requests
 from datetime import date, time
+import requests
 from .models import MyUser, Subscription
 from .serializers import UserSerializer, RegisterSerializer
+from .services import get_weather
 from weatherreminder.settings import API_KEY
+
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -26,25 +28,12 @@ class HomeView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        url = 'http://api.openweathermap.org/data/2.5/weather'
+
         cities = list(Subscription.objects.filter(user=request.user).all())
         context = {}
 
         for city in cities:
-            params = {'q': city.city, 'appid': API_KEY, 'units': 'metric'}
-            r = requests.get(url=url, params=params)
-            result = r.json()
-            city_context = {}
-
-            if result['cod'] == 200:
-                city_context['city'] = result['name']
-                city_context['weather'] = result['weather'][0]['main']
-                city_context['description'] = result['weather'][0]['description']
-                city_context['temp'] = result['main']['temp']
-                city_context['date'] = date.today()
-            elif result['cod'] == '404':
-                city_context['city'] = None
-
+            city_context = get_weather(city.city)
             context[city.city] = city_context
 
         return Response(context)
@@ -74,7 +63,7 @@ class SubscriptionsView(APIView):
             return Response({"message": "enter valid city name"})
         else:
             try:
-                subscription = City(user=request.user, city=city, notification=time(notification, 0, 0))
+                subscription = Subscription(user=request.user, city=city, notification=time(notification, 0, 0))
                 subscription.save()
                 user = MyUser.objects.get(id=request.user.id)
                 serialized = UserSerializer(user)
