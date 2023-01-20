@@ -19,7 +19,7 @@ class TestAuth(APITestCase):
     def test_register_POST_used_email(self):
         self.client.post(self.register_url, self.correct_data)
         response = self.client.post(self.register_url, self.correct_data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["message"], 'user with given email already exists')
 
     def test_register_POST_email_only(self):

@@ -1,11 +1,9 @@
 import requests
 import datetime
-from weatherreminder.settings import API_KEY
 
 
-def get_weather(cityname):
+def get_weather(cityname, API_KEY):
     url = 'http://api.openweathermap.org/data/2.5/weather'
-    # params = {'q': city.city, 'appid': API_KEY, 'units': 'metric'}
     params = {'q': cityname, 'appid': API_KEY, 'units': 'metric'}
     r = requests.get(url=url, params=params)
     result = r.json()
@@ -19,5 +17,7 @@ def get_weather(cityname):
         city_context['date'] = datetime.date.today()
     elif result['cod'] == '404':
         city_context['city'] = None
+    elif result['cod'] == 401:
+        city_context['error'] = "wrong api key"
 
     return city_context

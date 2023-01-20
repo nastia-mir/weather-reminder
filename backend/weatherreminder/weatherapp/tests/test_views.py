@@ -41,7 +41,7 @@ class TestViewsLoggedIn(APITestCase):
     def test_subscriptions_POST_invalid_city(self):
         response = self.client.post(self.subscriptions_url, {"city": "somecity",
                                                              "notification": 1})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data["message"], 'enter valid city name')
 
     def test_subscriptions_POST_invalid_notification(self):
@@ -55,7 +55,7 @@ class TestViewsLoggedIn(APITestCase):
                                                   "notification": 1})
         response = self.client.post(self.subscriptions_url, {"city": "kyiv",
                                                              "notification": 1})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["message"], 'you have already subscribed to kyiv')
 
     def test_subscriptions_PUT_correct(self):
@@ -74,13 +74,13 @@ class TestViewsLoggedIn(APITestCase):
                                                   "notification": 1})
         response = self.client.put(self.subscriptions_url, {"city": "kyiv",
                                                             "notification": 2})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["message"], 'you can set notification frequency only to 1, 3, 6 or 12 hours')
 
     def test_subscriptions_PUT_not_subscribed(self):
         response = self.client.put(self.subscriptions_url, {"city": "kyiv",
                                                              "notification": 1})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data["message"], 'you need to subscribe to kyiv first')
 
     def test_subscriptions_DELETE_correct(self):
@@ -91,7 +91,7 @@ class TestViewsLoggedIn(APITestCase):
 
     def test_subscriptions_DELETE_not_subscribed(self):
         response = self.client.delete(self.subscriptions_url, {"city": "kyiv"})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data["message"], 'subscription not found')
 
     def test_delete_user_DELETE_correct(self):
@@ -101,12 +101,12 @@ class TestViewsLoggedIn(APITestCase):
 
     def test_delete_user_DELETE_incorrect_email(self):
         response = self.client.delete(self.delete_user_url, {"email": "other@gmail.com"})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["message"], "you can not delete someone else's user")
 
     def test_delete_user_DELETE_not_exist(self):
         response = self.client.delete(self.delete_user_url, {"email": "notexist@gmail.com"})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data["message"], "user does not exist")
 
 

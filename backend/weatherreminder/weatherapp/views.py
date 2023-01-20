@@ -1,16 +1,19 @@
 from django.db import IntegrityError
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from datetime import date, time
+from rest_framework import status
+
+import datetime
 import requests
+
 from .models import MyUser, Subscription
 from .serializers import UserSerializer, RegisterSerializer
 from .services import get_weather
 from weatherreminder.settings import API_KEY
-
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -33,7 +36,7 @@ class HomeView(APIView):
         context = {}
 
         for city in cities:
-            city_context = get_weather(city.city)
+            city_context = get_weather(city.city, API_KEY)
             context[city.city] = city_context
 
         return Response(context)
@@ -43,8 +46,7 @@ class SubscriptionsView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        users = MyUser.objects.get(id=request.user.id)
-        serialized = UserSerializer(users)
+        serialized = UserSerializer(request.user)
         return Response(serialized.data)
 
     def post(self, request):
@@ -60,7 +62,8 @@ class SubscriptionsView(APIView):
             return Response({"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"})
 
         if result['cod'] == '404':
-            return Response({"message": "enter valid city name"})
+            return Response(status=status.HTTP_404_NOT_FOUND,
+                            data={"message": "enter valid city name"})
         else:
             try:
                 subscription = Subscription(user=request.user, city=city, notification=time(notification, 0, 0))
@@ -69,7 +72,8 @@ class SubscriptionsView(APIView):
                 serialized = UserSerializer(user)
                 return Response(serialized.data)
             except IntegrityError:
-                return Response({"message": "you have already subscribed to {}".format(city)})
+                return Response(status=status.HTTP_400_BAD_REQUEST,
+                                data={"message": "you have already subscribed to {}".format(city)})
 
     def put(self, request):
         city = request.data['city']
@@ -79,15 +83,17 @@ class SubscriptionsView(APIView):
 
         if city in cities:
             if notification not in [1, 3, 6, 12]:
-                return Response({"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"})
+                return Response(status=status.HTTP_400_BAD_REQUEST,
+                                data={"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"})
 
             subscription = Subscription.objects.get(user=request.user, city=city)
-            subscription.notification = time(notification, 0, 0)
+            subscription.notification = datetime.time(notification, 0, 0)
             subscription.save()
             serialized = UserSerializer(user)
             return Response(serialized.data)
         else:
-            return Response({"message": "you need to subscribe to {} first".format(city)})
+            return Response(status=status.HTTP_404_NOT_FOUND,
+                            data={"message": "you need to subscribe to {} first".format(city)})
 
     def delete(self, request):
         city = request.data['city']
@@ -96,21 +102,22 @@ class SubscriptionsView(APIView):
             subscription.delete()
             return Response({city: "deleted"})
         except:
-            return Response({"message": "subscription not found"})
+            return Response(status=status.HTTP_404_NOT_FOUND,
+                            data={"message": "subscription not found"})
 
 
 class RegisterView(APIView):
     def post(self, request):
         try:
             existing_user = MyUser.objects.get(email=request.data["email"])
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={"message": "user with given email already exists"})
         except:
             serializer = RegisterSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             user = serializer.save()
             serialized = UserSerializer(user)
             return Response(serialized.data)
-
-        return Response({"message": "user with given email already exists"})
 
 
 class DeleteUserView(APIView):
@@ -125,9 +132,11 @@ class DeleteUserView(APIView):
                 return Response({"email": email,
                                  "message": 'deleted'})
             else:
-                return Response({"message": "you can not delete someone else's user"})
+                return Response(status=status.HTTP_400_BAD_REQUEST,
+                                data={"message": "you can not delete someone else's user"})
         except:
-            return Response({"message": "user does not exist"})
+            return Response(status=status.HTTP_404_NOT_FOUND,
+                            data={"message": "user does not exist"})
 
 
 
