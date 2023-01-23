@@ -77,12 +77,13 @@ class WeatherReport:
             if notification not in [1, 3, 6, 12]:
                 context["status"] = status.HTTP_400_BAD_REQUEST
                 context["data"] = {"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"}
-            subscription = Subscription.objects.get(user=user, city=cityname)
-            subscription.notification = datetime.time(notification, 0, 0)
-            subscription.save()
-            serialized = UserSerializer(user)
-            context["status"] = status.HTTP_200_OK
-            context["data"] = serialized.data
+            else:
+                subscription = Subscription.objects.get(user=user, city=cityname)
+                subscription.notification = datetime.time(notification, 0, 0)
+                subscription.save()
+                serialized = UserSerializer(user)
+                context["status"] = status.HTTP_200_OK
+                context["data"] = serialized.data
         else:
             context["status"] = status.HTTP_404_NOT_FOUND
             context["data"] = {"message": "you need to subscribe to {} first".format(cityname)}
