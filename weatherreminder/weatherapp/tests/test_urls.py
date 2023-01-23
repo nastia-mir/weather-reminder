@@ -1,7 +1,9 @@
-from rest_framework.test import APITestCase
+from weatherapp import views
+
 from django.urls import reverse, resolve
+
+from rest_framework.test import APITestCase
 from rest_framework_simplejwt.views import TokenRefreshView
-from .. import views
 
 
 class TestUrls(APITestCase):

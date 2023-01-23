@@ -1,7 +1,9 @@
-from rest_framework.test import APITestCase
 from django.urls import reverse
-from .. import serializers
-from ..models import MyUser, City
+
+from rest_framework.test import APITestCase
+
+from weatherapp import serializers
+from weatherapp.models import MyUser, City
 
 
 class TestUserSerializer(APITestCase):

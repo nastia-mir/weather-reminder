@@ -1,4 +1,5 @@
 from rest_framework.test import APITestCase
+
 from django.urls import reverse
 
 
@@ -47,7 +48,7 @@ class TestViewsLoggedIn(APITestCase):
     def test_subscriptions_POST_invalid_notification(self):
         response = self.client.post(self.subscriptions_url, {"city": "kyiv",
                                                              "notification": 2})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["message"], 'you can set notification frequency only to 1, 3, 6 or 12 hours')
 
     def test_subscriptions_POST_already_subscribed(self):
@@ -91,8 +92,7 @@ class TestViewsLoggedIn(APITestCase):
 
     def test_subscriptions_DELETE_not_subscribed(self):
         response = self.client.delete(self.subscriptions_url, {"city": "kyiv"})
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.data["message"], 'subscription not found')
+        self.assertEqual(response.status_code, 200)
 
     def test_delete_user_DELETE_correct(self):
         response = self.client.delete(self.delete_user_url, {"email": "test@gmail.com"})

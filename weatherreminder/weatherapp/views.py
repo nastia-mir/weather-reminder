@@ -1,3 +1,6 @@
+import datetime
+import requests
+
 from django.db import IntegrityError
 
 from rest_framework.response import Response
@@ -7,12 +10,9 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import status
 
-import datetime
-import requests
-
-from .models import MyUser, Subscription
-from .serializers import UserSerializer, RegisterSerializer
-from .services import get_weather
+from weatherapp.models import MyUser, Subscription
+from weatherapp.serializers import UserSerializer, RegisterSerializer
+from weatherapp.services import get_weather
 from weatherreminderproject.settings import API_KEY
 
 
@@ -59,7 +59,8 @@ class SubscriptionsView(APIView):
 
         notification = int(request.data['notification'])
         if notification not in [1, 3, 6, 12]:
-            return Response({"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"})
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"})
 
         if result['cod'] == '404':
             return Response(status=status.HTTP_404_NOT_FOUND,
@@ -97,13 +98,8 @@ class SubscriptionsView(APIView):
 
     def delete(self, request):
         city = request.data['city']
-        try:
-            subscription = Subscription.objects.get(user=request.user, city=city)
-            subscription.delete()
-            return Response({city: "deleted"})
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND,
-                            data={"message": "subscription not found"})
+        Subscription.objects.filter(user=request.user, city=city).delete()
+        return Response({city: "deleted"})
 
 
 class RegisterView(APIView):

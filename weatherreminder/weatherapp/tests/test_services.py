@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase
-from ..services import get_weather
+
+from weatherapp.services import get_weather
 from weatherreminder.settings import API_KEY
 
 class TestServices(APITestCase):

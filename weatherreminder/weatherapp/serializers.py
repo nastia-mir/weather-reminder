@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import MyUser, Subscription
+
+from weatherapp.models import MyUser, Subscription
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
