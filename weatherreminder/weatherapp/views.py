@@ -12,8 +12,7 @@ from rest_framework import status
 
 from weatherapp.models import MyUser, Subscription
 from weatherapp.serializers import UserSerializer, RegisterSerializer
-from weatherapp.services import get_weather
-from weatherreminderproject.settings import API_KEY
+from weatherapp.services import WeatherReport
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -31,14 +30,8 @@ class HomeView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-
         cities = list(Subscription.objects.filter(user=request.user).all())
-        context = {}
-
-        for city in cities:
-            city_context = get_weather(city.city, API_KEY)
-            context[city.city] = city_context
-
+        context = WeatherReport.get_weather(cities)
         return Response(context)
 
 
@@ -50,51 +43,18 @@ class SubscriptionsView(APIView):
         return Response(serialized.data)
 
     def post(self, request):
-        url = 'http://api.openweathermap.org/data/2.5/weather'
         city = request.data['city']
-
-        params = {'q': city, 'appid': API_KEY, 'units': 'metric'}
-        r = requests.get(url=url, params=params)
-        result = r.json()
-
         notification = int(request.data['notification'])
-        if notification not in [1, 3, 6, 12]:
-            return Response(status=status.HTTP_400_BAD_REQUEST,
-                            data={"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"})
-
-        if result['cod'] == '404':
-            return Response(status=status.HTTP_404_NOT_FOUND,
-                            data={"message": "enter valid city name"})
-        else:
-            try:
-                subscription = Subscription(user=request.user, city=city, notification=datetime.time(notification, 0, 0))
-                subscription.save()
-                user = MyUser.objects.get(id=request.user.id)
-                serialized = UserSerializer(user)
-                return Response(serialized.data)
-            except IntegrityError:
-                return Response(status=status.HTTP_400_BAD_REQUEST,
-                                data={"message": "you have already subscribed to {}".format(city)})
+        context = WeatherReport.add_subscription(city, notification, request.user)
+        return Response(status=context["status"],
+                        data=context["data"])
 
     def put(self, request):
         city = request.data['city']
         notification = int(request.data['notification'])
-        user = MyUser.objects.get(id=request.user.id)
-        cities = [city['city'] for city in UserSerializer(user).data['cities']]
-
-        if city in cities:
-            if notification not in [1, 3, 6, 12]:
-                return Response(status=status.HTTP_400_BAD_REQUEST,
-                                data={"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"})
-
-            subscription = Subscription.objects.get(user=request.user, city=city)
-            subscription.notification = datetime.time(notification, 0, 0)
-            subscription.save()
-            serialized = UserSerializer(user)
-            return Response(serialized.data)
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND,
-                            data={"message": "you need to subscribe to {} first".format(city)})
+        context = WeatherReport.edit_subscription(city, notification, request.user)
+        return Response(status=context["status"],
+                        data=context["data"])
 
     def delete(self, request):
         city = request.data['city']
