@@ -121,9 +121,11 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': '1111',
         'HOST': 'localhost',
-        'PORT': '5432'
+        'PORT': '5432',
     }
 }
+
+ALLOWED_HOSTS = ['*']
 
 
 # Password validation
