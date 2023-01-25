@@ -7,12 +7,13 @@ services:
       - POSTGRES_DB=weather_reminder
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1111
-      - POSTGRES_HOST=localhost
+      - POSTGRES_HOST=db
     ports:
       - "5432:5432"
   web:
     build: .
-    command: python manage.py runserver
+    image: app
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
@@ -22,5 +23,15 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1111
       - POSTGRES_HOST=localhost
+    depends_on:
+      - db
+  migration:
+    build: .
+    image: app
+    command: python manage.py migrate
+    volumes:
+      - .:/code
+    links:
+      - db
     depends_on:
       - db

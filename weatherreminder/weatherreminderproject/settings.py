@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -16,8 +17,7 @@ API_KEY = '31ee71338fd9a262442351ab26c5707e'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -120,12 +120,22 @@ DATABASES = {
         'NAME': 'weather_reminder',
         'USER': 'postgres',
         'PASSWORD': '1111',
-        'HOST': 'localhost',
+        'HOST': 'db',
+        # 'HOST': 'localhost',
         'PORT': '5432',
     }
 }
 
-ALLOWED_HOSTS = ['*']
+# DATABASES = {
+#  'default': {
+#     'ENGINE': 'django.db.backends.postgresql',
+#    'NAME': os.environ.get('POSTGRES_NAME'),
+#   'USER': os.environ.get('POSTGRES_USER'),
+#  'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+# 'HOST': 'db',
+# 'PORT': 5432,
+#  }
+# }
 
 
 # Password validation
