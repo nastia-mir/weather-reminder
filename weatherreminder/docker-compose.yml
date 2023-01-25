@@ -7,9 +7,7 @@ services:
       - POSTGRES_DB=weather_reminder
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1111
-      - POSTGRES_HOST=db
-    ports:
-      - "5432:5432"
+      - POSTGRES_HOST=local
   web:
     build: .
     image: app
