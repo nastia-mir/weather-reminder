@@ -8,7 +8,8 @@ from django.db import IntegrityError
 from weatherreminderproject.settings import API_KEY
 
 from weatherapp.models import MyUser, Subscription
-from weatherapp.serializers import UserSerializer
+from weatherapp.serializers import UserSerializer, SubscriptionSerializer
+from weatherapp.tasks import send_email_subscribed_task
 
 
 class WeatherReport:
@@ -57,13 +58,14 @@ class WeatherReport:
         else:
             try:
                 subscription = Subscription(user=user, city=cityname, notification=datetime.time(notification, 0, 0))
+                # print(SubscriptionSerializer(subscription).data)
                 subscription.save()
                 user = MyUser.objects.get(id=user.id)
                 serialized = UserSerializer(user)
                 context["status"] = status.HTTP_200_OK
                 context["data"] = serialized.data
 
-                send_email_subscribed_task.delay(serialized.data)
+                send_email_subscribed_task.delay(user.email, SubscriptionSerializer(subscription).data)
 
 
             except IntegrityError:
