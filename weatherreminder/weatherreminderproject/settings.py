@@ -95,7 +95,7 @@ ROOT_URLCONF = 'weatherreminderproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -112,7 +112,6 @@ WSGI_APPLICATION = 'weatherreminderproject.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -120,22 +119,10 @@ DATABASES = {
         'NAME': 'weather_reminder',
         'USER': 'postgres',
         'PASSWORD': '1111',
-        'HOST': 'db',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
-
-# DATABASES = {
-#  'default': {
-#     'ENGINE': 'django.db.backends.postgresql',
-#    'NAME': os.environ.get('POSTGRES_NAME'),
-#   'USER': os.environ.get('POSTGRES_USER'),
-#  'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-# 'HOST': 'db',
-# 'PORT': 5432,
-#  }
-# }
-
 
 # Password validation
 
@@ -153,8 +140,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-
 
 
 # Internationalization
@@ -176,11 +161,16 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Celery configs
 
-'''REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
-}'''
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
+
+# email configs
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'nastasia.ua@gmail.com'
+EMAIL_HOST_PASSWORD = 'qetdzdlxvhtnrlct'

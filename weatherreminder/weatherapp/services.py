@@ -63,6 +63,9 @@ class WeatherReport:
                 context["status"] = status.HTTP_200_OK
                 context["data"] = serialized.data
 
+                send_email_subscribed_task.delay(serialized.data)
+
+
             except IntegrityError:
                 context["status"] = status.HTTP_400_BAD_REQUEST
                 context["data"] = {"message": "you have already subscribed to {}".format(cityname)}
