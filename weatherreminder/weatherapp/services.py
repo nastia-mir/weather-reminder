@@ -58,15 +58,20 @@ class WeatherReport:
         else:
             try:
                 subscription = Subscription(user=user, city=cityname, notification=datetime.time(notification, 0, 0))
-                # print(SubscriptionSerializer(subscription).data)
+                subscription_data = SubscriptionSerializer(subscription).data
                 subscription.save()
                 user = MyUser.objects.get(id=user.id)
+
                 serialized = UserSerializer(user)
                 context["status"] = status.HTTP_200_OK
                 context["data"] = serialized.data
+                email_data = {
+                    'email': user.email,
+                    'city': subscription_data['city'],
+                    'notification': subscription_data['notification']
+                }
 
-                send_email_subscribed_task.delay(user.email, SubscriptionSerializer(subscription).data)
-
+                send_email_subscribed_task.delay(email_data)
 
             except IntegrityError:
                 context["status"] = status.HTTP_400_BAD_REQUEST

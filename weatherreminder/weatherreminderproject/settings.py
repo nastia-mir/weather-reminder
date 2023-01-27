@@ -165,6 +165,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CELERY_BROKER_URL = 'pyamqp://localhost'
 CELERY_RESULT_BACKEND = 'rpc://localhost'
+CELERY_IMPORTS = ('weatherapp.tasks',)
 
 # email configs
 
