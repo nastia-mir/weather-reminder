@@ -1,1 +1,0 @@
-You have sucessfully subsctibed to {{city}}. You will receive notification every {{notification}}.

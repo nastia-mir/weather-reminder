@@ -5,15 +5,19 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 
 from celery.utils.log import get_task_logger
+from celery.schedules import crontab
 
 from weatherreminderproject.celery import app
+
+from weatherapp.models import MyUser, Subscription
+from weatherapp.services import WeatherReport
 
 logger = get_task_logger(__name__)
 
 
 def send_email(email_data):
     subject = 'Successfully subscribed'
-    message = render_to_string("email_template.txt", email_data)
+    message = render_to_string("email_template.html", email_data)
     email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, [email_data['email']])
     return email.send(fail_silently=False)
 
@@ -21,7 +25,26 @@ def send_email(email_data):
 @app.task(name='send_email_subscribed_task')
 def send_email_subscribed_task(email_data):
     logger.info("Sent email")
-    print("task started")
     return send_email(email_data)
+
+
+@app.task(name='send_scheduled', bind=True)
+def send_scheduled():
+    subject = 'test periodic'
+    message = render_to_string("test_email.html")
+    email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, ['nastasia.ua@gmail.com'])
+    return email.send(fail_silently=False)
+
+
+
+# @app.task(name='send_scheduled_email')
+# def send_scheduled_email(notification):
+  #  cities = Subscription.objects.filter(notification=notification).group_by('user')
+  #  print(cities)
+  #  city_data = WeatherReport.get_weather(cities)
+  #  return city_data
+
+
+
 
 

@@ -9,7 +9,7 @@ from weatherreminderproject.settings import API_KEY
 
 from weatherapp.models import MyUser, Subscription
 from weatherapp.serializers import UserSerializer, SubscriptionSerializer
-from weatherapp.tasks import send_email_subscribed_task
+# from weatherapp.tasks import send_email_subscribed_task
 
 
 class WeatherReport:
@@ -57,7 +57,7 @@ class WeatherReport:
 
         else:
             try:
-                subscription = Subscription(user=user, city=cityname, notification=datetime.time(notification, 0, 0))
+                subscription = Subscription(user=user, city=cityname, notification=notification)
                 subscription_data = SubscriptionSerializer(subscription).data
                 subscription.save()
                 user = MyUser.objects.get(id=user.id)
@@ -68,10 +68,11 @@ class WeatherReport:
                 email_data = {
                     'email': user.email,
                     'city': subscription_data['city'],
-                    'notification': subscription_data['notification']
+                    'notification': subscription_data['notification'],
+                    'weather': cls.get_weather([subscription])[subscription_data['city']]
                 }
 
-                send_email_subscribed_task.delay(email_data)
+                # send_email_subscribed_task.delay(email_data)
 
             except IntegrityError:
                 context["status"] = status.HTTP_400_BAD_REQUEST
@@ -89,7 +90,7 @@ class WeatherReport:
                 context["data"] = {"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"}
             else:
                 subscription = Subscription.objects.get(user=user, city=cityname)
-                subscription.notification = datetime.time(notification, 0, 0)
+                subscription.notification = notification
                 subscription.save()
                 serialized = UserSerializer(user)
                 context["status"] = status.HTTP_200_OK
