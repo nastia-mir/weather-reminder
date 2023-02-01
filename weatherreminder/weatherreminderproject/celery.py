@@ -1,5 +1,4 @@
 import os
-import json
 
 from celery import Celery
 from celery.schedules import crontab
@@ -17,7 +16,6 @@ app.conf.beat_schedule = {
         'args': [1],
     }
 }
-
 
 app.autodiscover_tasks()
 
