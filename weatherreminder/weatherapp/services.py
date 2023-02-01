@@ -56,19 +56,12 @@ class WeatherReport:
         else:
             try:
                 subscription = Subscription(user=user, city=cityname, notification=notification)
-                subscription_data = SubscriptionSerializer(subscription).data
                 subscription.save()
                 user = MyUser.objects.get(id=user.id)
 
                 serialized = UserSerializer(user)
                 context["status"] = status.HTTP_200_OK
                 context["data"] = serialized.data
-                # email_data = {
-                #    'email': user.email,
-                #    'city': subscription_data['city'],
-                #    'notification': subscription_data['notification'],
-                #    'weather': cls.get_weather([subscription])[subscription_data['city']]
-                # }
 
             except IntegrityError:
                 context["status"] = status.HTTP_400_BAD_REQUEST
