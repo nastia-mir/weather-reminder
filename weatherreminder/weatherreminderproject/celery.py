@@ -14,7 +14,7 @@ app.conf.beat_schedule = {
     'send-scheduled-1': {
         'task': 'weatherapp.tasks.send_scheduled_email',
         'schedule': crontab(minute='*/1'),
-        'args': json.dumps([1]),
+        'args': [1],
     }
 }
 
