@@ -12,22 +12,22 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.conf.beat_schedule = {
     'send-scheduled-1': {
         'task': 'send_scheduled_email',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(hour='*/1'),
         'args': [1],
     },
     'send-scheduled-3': {
         'task': 'send_scheduled_email',
-        'schedule': crontab(minute='*/3'),
+        'schedule': crontab(hour='*/3'),
         'args': [3],
     },
     'send-scheduled-6': {
         'task': 'send_scheduled_email',
-        'schedule': crontab(minute='*/6'),
+        'schedule': crontab(hour='*/6'),
         'args': [6],
     },
     'send-scheduled-12': {
         'task': 'send_scheduled_email',
-        'schedule': crontab(minute='*/12'),
+        'schedule': crontab(hour='*/12'),
         'args': [12],
     },
 }
