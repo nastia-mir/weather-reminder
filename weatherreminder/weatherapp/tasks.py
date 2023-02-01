@@ -28,23 +28,22 @@ def send_email_subscribed_task(email_data):
     return send_email(email_data)
 
 
-@app.task(name='send_scheduled', bind=True)
-def send_scheduled():
-    subject = 'test periodic'
-    message = render_to_string("test_email.html")
-    email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, ['nastasia.ua@gmail.com'])
-    return email.send(fail_silently=False)
+@app.task(name='send_scheduled_email')
+def send_scheduled_email(notification):
+    logger.info("Sent email")
 
+    cities = list(Subscription.objects.filter(notification=notification).all())
 
+    emails = {}
+    for subscription in cities:
+        if not subscription.user.email in emails:
+            emails[subscription.user.email] = [subscription]
+        else:
+            emails[subscription.user.email].append(subscription)
 
-# @app.task(name='send_scheduled_email')
-# def send_scheduled_email(notification):
-  #  cities = Subscription.objects.filter(notification=notification).group_by('user')
-  #  print(cities)
-  #  city_data = WeatherReport.get_weather(cities)
-  #  return city_data
-
-
-
-
-
+    for user in emails:
+        email_data = {'weather': WeatherReport.get_weather(emails[user])}
+        subject = 'Weather'
+        message = render_to_string("test_email.html", email_data)
+        email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, [user])
+        email.send(fail_silently=False)

@@ -13,6 +13,7 @@ from rest_framework import status
 from weatherapp.models import MyUser, Subscription
 from weatherapp.serializers import UserSerializer, RegisterSerializer
 from weatherapp.services import WeatherReport
+from weatherapp.tasks import send_scheduled_email
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -32,6 +33,9 @@ class HomeView(APIView):
     def get(self, request):
         cities = list(Subscription.objects.filter(user=request.user).all())
         context = WeatherReport.get_weather(cities)
+
+        send_scheduled_email(1)
+
         return Response(context)
 
 
@@ -93,7 +97,3 @@ class DeleteUserView(APIView):
         except:
             return Response(status=status.HTTP_404_NOT_FOUND,
                             data={"message": "user does not exist"})
-
-
-
-

@@ -9,7 +9,6 @@ from weatherreminderproject.settings import API_KEY
 
 from weatherapp.models import MyUser, Subscription
 from weatherapp.serializers import UserSerializer, SubscriptionSerializer
-# from weatherapp.tasks import send_email_subscribed_task
 
 
 class WeatherReport:
@@ -30,7 +29,6 @@ class WeatherReport:
                 city_report['weather'] = result['weather'][0]['main']
                 city_report['description'] = result['weather'][0]['description']
                 city_report['temp'] = result['main']['temp']
-                city_report['date'] = datetime.date.today()
             elif result['cod'] == '404':
                 city_report['city'] = None
             elif result['cod'] == 401:
@@ -65,14 +63,12 @@ class WeatherReport:
                 serialized = UserSerializer(user)
                 context["status"] = status.HTTP_200_OK
                 context["data"] = serialized.data
-                email_data = {
-                    'email': user.email,
-                    'city': subscription_data['city'],
-                    'notification': subscription_data['notification'],
-                    'weather': cls.get_weather([subscription])[subscription_data['city']]
-                }
-
-                # send_email_subscribed_task.delay(email_data)
+                # email_data = {
+                #    'email': user.email,
+                #    'city': subscription_data['city'],
+                #    'notification': subscription_data['notification'],
+                #    'weather': cls.get_weather([subscription])[subscription_data['city']]
+                # }
 
             except IntegrityError:
                 context["status"] = status.HTTP_400_BAD_REQUEST
