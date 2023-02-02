@@ -32,6 +32,10 @@ app.conf.beat_schedule = {
     },
 
 
+    'update-weather': {
+        'task': 'update_weather',
+        'schedule': crontab(minute='*/10'),
+    }
 }
 
 app.autodiscover_tasks()

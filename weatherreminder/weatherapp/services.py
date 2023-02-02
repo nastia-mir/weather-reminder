@@ -41,11 +41,6 @@ class WeatherReport:
             city.temperature = result['main']['temp']
             city.save()
 
-
-
-
-
-
     @classmethod
     def add_subscription(cls, cityname, notification, user):
         params = {'q': cityname, 'appid': API_KEY, 'units': 'metric'}
