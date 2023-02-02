@@ -30,6 +30,8 @@ app.conf.beat_schedule = {
         'schedule': crontab(hour='*/12'),
         'args': [12],
     },
+
+
 }
 
 app.autodiscover_tasks()

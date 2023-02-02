@@ -6,8 +6,8 @@ from django.db import IntegrityError
 
 from weatherreminderproject.settings import API_KEY
 
-from weatherapp.models import MyUser, Subscription
-from weatherapp.serializers import UserSerializer, SubscriptionSerializer
+from weatherapp.models import MyUser, Subscription, Weather
+from weatherapp.serializers import UserSerializer, SubscriptionSerializer, WeatherSerializer
 
 
 class WeatherReport:
@@ -18,24 +18,33 @@ class WeatherReport:
         report = {}
 
         for city in cities:
+            weather = Weather.objects.get(city=city.city)
+            serialized = WeatherSerializer(weather)
+            report[city.city] = serialized.data
+
+        return report
+
+    @classmethod
+    def update_weather(cls):
+        cities = Weather.objects.all()
+        for city in cities:
+            try:
+                subscription = Subscription.objects.get(city=city.cityname)
+            except:
+                city.delete()
+
             params = {'q': city.city, 'appid': API_KEY, 'units': 'metric'}
             r = requests.get(url=cls.url, params=params)
             result = r.json()
-            city_report = {}
+            city.weather = result['weather'][0]['main']
+            city.description = result['weather'][0]['description']
+            city.temperature = result['main']['temp']
+            city.save()
 
-            if result['cod'] == 200:
-                city_report['city'] = result['name']
-                city_report['weather'] = result['weather'][0]['main']
-                city_report['description'] = result['weather'][0]['description']
-                city_report['temp'] = result['main']['temp']
-            elif result['cod'] == '404':
-                city_report['city'] = None
-            elif result['cod'] == 401:
-                city_report['error'] = "wrong api key"
 
-            report[city.city] = city_report
 
-        return report
+
+
 
     @classmethod
     def add_subscription(cls, cityname, notification, user):
@@ -57,6 +66,15 @@ class WeatherReport:
                 subscription = Subscription(user=user, city=cityname, notification=notification)
                 subscription.save()
                 user = MyUser.objects.get(id=user.id)
+
+                try:
+                    weather = Weather.objects.get(city=cityname)
+                except:
+                    weather = Weather(city=cityname,
+                                      weather=result['weather'][0]['main'],
+                                      description=result['weather'][0]['description'],
+                                      temperature=result['main']['temp'])
+                    weather.save()
 
                 serialized = UserSerializer(user)
                 context["status"] = status.HTTP_200_OK

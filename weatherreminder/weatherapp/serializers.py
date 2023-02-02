@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from weatherapp.models import MyUser, Subscription
+from weatherapp.models import MyUser, Subscription, Weather
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -15,6 +15,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyUser
         fields = ['email', 'cities']
+
+
+class WeatherSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Weather
+        fields = ['weather', 'description', 'temperature']
 
 
 class RegisterSerializer(serializers.ModelSerializer):

@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
-import datetime
 
 
 class MyUserManager(BaseUserManager):
@@ -37,3 +36,16 @@ class Subscription(models.Model):
 
     def __str__(self):
         return self.city
+
+
+class Weather(models.Model):
+    city = models.CharField(max_length=150, unique=True)
+    weather = models.CharField(max_length=500)
+    description = models.CharField(max_length=10000)
+    temperature = models.FloatField()
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return '{}, weather {}'.format(self.city, self.weather)
+

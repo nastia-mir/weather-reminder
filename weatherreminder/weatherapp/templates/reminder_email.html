@@ -1,0 +1,15 @@
+{% autoescape off %}
+
+This is your daily weather reminder!
+
+{% for city, values in weather.items %}
+
+Here in your weather for {{city}}:
+
+Weather: {{values.weather}}
+Description: {{values.description}}
+Temperature: {{values.temp}}
+
+{% endfor %}
+
+{% endautoescape %}

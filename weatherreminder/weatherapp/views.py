@@ -33,9 +33,6 @@ class HomeView(APIView):
     def get(self, request):
         cities = list(Subscription.objects.filter(user=request.user).all())
         context = WeatherReport.get_weather(cities)
-
-        send_scheduled_email(1)
-
         return Response(context)
 
 
