@@ -42,13 +42,13 @@ class WeatherReport:
             city.save()
 
     @classmethod
-    def add_subscription(cls, cityname, notification, user):
+    def add_subscription(cls, cityname, notification_frequency, user):
         params = {'q': cityname, 'appid': API_KEY, 'units': 'metric'}
         r = requests.get(url=cls.url, params=params)
         result = r.json()
         context = {}
 
-        if notification not in [1, 3, 6, 12]:
+        if notification_frequency not in [1, 3, 6, 12]:
             context["status"] = status.HTTP_400_BAD_REQUEST
             context["data"] = {"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"}
 
@@ -58,7 +58,7 @@ class WeatherReport:
 
         else:
             try:
-                subscription = Subscription(user=user, city=cityname, notification=notification)
+                subscription = Subscription(user=user, city=cityname, notification_frequency=notification_frequency)
                 subscription.save()
                 user = MyUser.objects.get(id=user.id)
 
@@ -82,16 +82,16 @@ class WeatherReport:
         return context
 
     @classmethod
-    def edit_subscription(cls, cityname, notification, user):
+    def edit_subscription(cls, cityname, notification_frequency, user):
         context = {}
         cities = [city['city'] for city in UserSerializer(MyUser.objects.get(id=user.id)).data['cities']]
         if cityname in cities:
-            if notification not in [1, 3, 6, 12]:
+            if notification_frequency not in [1, 3, 6, 12]:
                 context["status"] = status.HTTP_400_BAD_REQUEST
                 context["data"] = {"message": "you can set notification frequency only to 1, 3, 6 or 12 hours"}
             else:
                 subscription = Subscription.objects.get(user=user, city=cityname)
-                subscription.notification = notification
+                subscription.notification_frequency = notification_frequency
                 subscription.save()
                 serialized = UserSerializer(user)
                 context["status"] = status.HTTP_200_OK

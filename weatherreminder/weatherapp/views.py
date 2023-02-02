@@ -13,7 +13,6 @@ from rest_framework import status
 from weatherapp.models import MyUser, Subscription
 from weatherapp.serializers import UserSerializer, RegisterSerializer
 from weatherapp.services import WeatherReport
-from weatherapp.tasks import send_scheduled_email
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -45,15 +44,15 @@ class SubscriptionsView(APIView):
 
     def post(self, request):
         city = request.data['city']
-        notification = int(request.data['notification'])
-        context = WeatherReport.add_subscription(city, notification, request.user)
+        notification_frequency = int(request.data['notification_frequency'])
+        context = WeatherReport.add_subscription(city, notification_frequency, request.user)
         return Response(status=context["status"],
                         data=context["data"])
 
     def put(self, request):
         city = request.data['city']
-        notification = int(request.data['notification'])
-        context = WeatherReport.edit_subscription(city, notification, request.user)
+        notification_frequency = int(request.data['notification_frequency'])
+        context = WeatherReport.edit_subscription(city, notification_frequency, request.user)
         return Response(status=context["status"],
                         data=context["data"])
 

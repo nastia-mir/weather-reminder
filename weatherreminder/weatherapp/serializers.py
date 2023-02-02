@@ -6,7 +6,7 @@ from weatherapp.models import MyUser, Subscription, Weather
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
-        fields = ['city', 'notification']
+        fields = ['city', 'notification_frequency']
 
 
 class UserSerializer(serializers.ModelSerializer):
