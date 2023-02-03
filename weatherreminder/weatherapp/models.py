@@ -31,6 +31,7 @@ class Subscription(models.Model):
     user = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='cities')
     city = models.CharField(max_length=150, unique=True)
     notification_frequency = models.IntegerField(default=1)
+    url = models.CharField(max_length=500, blank=True)
 
     objects = models.Manager()
 

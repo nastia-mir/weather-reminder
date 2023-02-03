@@ -1,8 +1,3 @@
-import datetime
-import requests
-
-from django.db import IntegrityError
-
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -45,7 +40,11 @@ class SubscriptionsView(APIView):
     def post(self, request):
         city = request.data['city']
         notification_frequency = int(request.data['notification_frequency'])
-        context = WeatherReport.add_subscription(city, notification_frequency, request.user)
+        try:
+            url = request.data['url']
+        except:
+            url = None
+        context = WeatherReport.add_subscription(city, notification_frequency, request.user, url)
         return Response(status=context["status"],
                         data=context["data"])
 

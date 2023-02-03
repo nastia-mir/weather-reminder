@@ -42,7 +42,7 @@ class WeatherReport:
             city.save()
 
     @classmethod
-    def add_subscription(cls, cityname, notification_frequency, user):
+    def add_subscription(cls, cityname, notification_frequency, user, url):
         params = {'q': cityname, 'appid': API_KEY, 'units': 'metric'}
         r = requests.get(url=cls.url, params=params)
         result = r.json()
@@ -58,7 +58,15 @@ class WeatherReport:
 
         else:
             try:
-                subscription = Subscription(user=user, city=cityname, notification_frequency=notification_frequency)
+                if url:
+                    subscription = Subscription(user=user,
+                                                city=cityname,
+                                                notification_frequency=notification_frequency,
+                                                url=url)
+                else:
+                    subscription = Subscription(user=user,
+                                                city=cityname,
+                                                notification_frequency=notification_frequency)
                 subscription.save()
                 user = MyUser.objects.get(id=user.id)
 
