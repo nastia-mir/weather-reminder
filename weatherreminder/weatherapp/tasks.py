@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+from collections import defaultdict
 
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
@@ -15,15 +16,12 @@ logger = get_task_logger(__name__)
 
 
 @app.task(name='send_scheduled_email')
-def send_scheduled_email(notification):
-    cities = list(Subscription.objects.filter(notification=notification).all())
+def send_scheduled_email(notification_frequency):
+    cities = list(Subscription.objects.filter(notification_frequency=notification_frequency).all())
+    emails = defaultdict(list)
 
-    emails = {}
     for subscription in cities:
-        if not subscription.user.email in emails:
-            emails[subscription.user.email] = [subscription]
-        else:
-            emails[subscription.user.email].append(subscription)
+        emails[subscription.user.email] = [subscription]
 
     for user in emails:
         email_data = {'weather': WeatherReport.get_weather(emails[user])}
