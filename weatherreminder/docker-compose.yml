@@ -1,4 +1,5 @@
 services:
+
   db:
     image: postgres
     volumes:
@@ -8,6 +9,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1111
       - POSTGRES_HOST=local
+
   web:
     build: .
     image: app
@@ -23,6 +25,7 @@ services:
       - POSTGRES_HOST=localhost
     depends_on:
       - db
+
   migration:
     build: .
     image: app
@@ -33,3 +36,28 @@ services:
       - db
     depends_on:
       - db
+
+  rabbitmq:
+    container_name: rabbitmq
+    restart: always
+    image: rabbitmq:3.9-alpine
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  celery:
+    container_name: celeryworker
+    build: .
+    volumes:
+      - ./:/code
+    command: celery -A weatherreminderproject worker --loglevel=info -P eventlet
+    depends_on:
+      - rabbitmq
+
+  celeryscheduler:
+    container_name: celeryscheduler
+    build: .
+    volumes:
+      - ./:/code
+    command: celery -A  weatherreminderproject  beat -l info
+    depends_on:
+      - celery

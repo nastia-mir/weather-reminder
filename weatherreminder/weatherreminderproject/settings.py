@@ -120,7 +120,7 @@ DATABASES = {
         'NAME': 'weather_reminder',
         'USER': 'postgres',
         'PASSWORD': '1111',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': '5432',
     }
 }
@@ -164,7 +164,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Celery configs
 
-CELERY_BROKER_URL = 'pyamqp://localhost'
+RABBITMQ = {
+    "PROTOCOL": "amqp",
+    "HOST": os.getenv("RABBITMQ_HOST", "localhost"),
+    "PORT": os.getenv("RABBITMQ_PORT", 5672),
+    "USER": os.getenv("RABBITMQ_USER", "guest"),
+    "PASSWORD": os.getenv("RABBITMQ_PASSWORD", "guest"),
+}
+
+CELERY_BROKER_URL = f"{RABBITMQ['PROTOCOL']}://{RABBITMQ['USER']}:{RABBITMQ['PASSWORD']}@{RABBITMQ['HOST']}:{RABBITMQ['PORT']}"
 CELERY_RESULT_BACKEND = 'rpc://localhost'
 CELERY_IMPORTS = ('weatherapp.tasks',)
 

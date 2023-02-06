@@ -43,7 +43,7 @@ def send_scheduled_webhook(notification_frequency):
     webhooks = defaultdict(list)
 
     for subscription in cities_webhook:
-        webhooks[subscription.url] = [subscription]
+        webhooks[subscription.user.email].append(subscription)
 
     for url in webhooks:
         webhook_data = {'weather': WeatherReport.get_weather(webhooks[url])}
