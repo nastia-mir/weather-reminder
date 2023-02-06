@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
-import datetime
 
 
 class MyUserManager(BaseUserManager):
@@ -31,9 +30,23 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
 class Subscription(models.Model):
     user = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='cities')
     city = models.CharField(max_length=150, unique=True)
-    notification = models.TimeField(auto_now=False, auto_now_add=False, default=datetime.time(12, 0, 0))
+    notification_frequency = models.IntegerField(default=1)
+    url = models.CharField(max_length=500, blank=True)
 
     objects = models.Manager()
 
     def __str__(self):
         return self.city
+
+
+class Weather(models.Model):
+    city = models.CharField(max_length=150, unique=True)
+    weather = models.CharField(max_length=500)
+    description = models.CharField(max_length=10000)
+    temperature = models.FloatField()
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return '{}, weather {}'.format(self.city, self.weather)
+

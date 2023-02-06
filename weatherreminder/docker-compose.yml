@@ -1,0 +1,67 @@
+services:
+
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=weather_reminder
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1111
+      - POSTGRES_HOST=local
+
+  web:
+    build: .
+    image: app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_DB=weather_reminder
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1111
+      - POSTGRES_HOST=localhost
+    depends_on:
+      - db
+
+  migration:
+    build: .
+    image: app
+    command: python manage.py migrate
+    volumes:
+      - .:/code
+    links:
+      - db
+    depends_on:
+      - db
+
+  rabbitmq:
+    container_name: rabbitmq
+    restart: always
+    image: rabbitmq:3.9-alpine
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  celery:
+    container_name: celeryworker
+    build: .
+    volumes:
+      - ./:/code
+    command: celery -A weatherreminderproject worker --loglevel=info -P eventlet
+    depends_on:
+      - rabbitmq
+
+  celeryscheduler:
+    container_name: celeryscheduler
+    build: .
+    volumes:
+      - ./:/code
+    command: celery -A  weatherreminderproject  beat -l info
+    depends_on:
+      - celery
+
+volumes:
+  db_data:
+  rabbitmq_data:

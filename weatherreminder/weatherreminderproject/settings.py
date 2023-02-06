@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -16,8 +17,7 @@ API_KEY = '31ee71338fd9a262442351ab26c5707e'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -28,7 +28,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'weatherapp',
     'rest_framework',
-    'rest_framework_simplejwt.token_blacklist'
+    'rest_framework_simplejwt.token_blacklist',
+    'django_celery_beat'
 ]
 
 
@@ -95,7 +96,7 @@ ROOT_URLCONF = 'weatherreminderproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -112,15 +113,17 @@ WSGI_APPLICATION = 'weatherreminderproject.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'weather_reminder',
+        'USER': 'postgres',
+        'PASSWORD': '1111',
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 
@@ -138,8 +141,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-
 
 
 # Internationalization
@@ -161,11 +162,25 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Celery configs
 
-'''REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
-}'''
+RABBITMQ = {
+    "PROTOCOL": "amqp",
+    "HOST": os.getenv("RABBITMQ_HOST", "rabbitmq"),
+    "PORT": os.getenv("RABBITMQ_PORT", 5672),
+    "USER": os.getenv("RABBITMQ_USER", "guest"),
+    "PASSWORD": os.getenv("RABBITMQ_PASSWORD", "guest"),
+}
+
+CELERY_BROKER_URL = f"{RABBITMQ['PROTOCOL']}://{RABBITMQ['USER']}:{RABBITMQ['PASSWORD']}@{RABBITMQ['HOST']}:{RABBITMQ['PORT']}"
+CELERY_RESULT_BACKEND = 'rpc://localhost'
+CELERY_IMPORTS = ('weatherapp.tasks',)
+
+# email configs
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'nastasia.ua@gmail.com'
+EMAIL_HOST_PASSWORD = 'qetdzdlxvhtnrlct'
