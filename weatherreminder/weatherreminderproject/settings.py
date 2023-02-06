@@ -166,7 +166,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 RABBITMQ = {
     "PROTOCOL": "amqp",
-    "HOST": os.getenv("RABBITMQ_HOST", "localhost"),
+    "HOST": os.getenv("RABBITMQ_HOST", "rabbitmq"),
     "PORT": os.getenv("RABBITMQ_PORT", 5672),
     "USER": os.getenv("RABBITMQ_USER", "guest"),
     "PASSWORD": os.getenv("RABBITMQ_PASSWORD", "guest"),

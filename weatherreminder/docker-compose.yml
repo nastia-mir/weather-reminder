@@ -61,3 +61,7 @@ services:
     command: celery -A  weatherreminderproject  beat -l info
     depends_on:
       - celery
+
+volumes:
+  db_data:
+  rabbitmq_data:
